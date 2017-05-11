@@ -8,7 +8,7 @@
 module.exports = {
 
   attributes: {
-  	 no:{
+    no:{
       type:'integer',
       autoIncrement:true,
       primaryKey:true
@@ -70,6 +70,60 @@ module.exports = {
       model:'users'
     }
     
+  },
+
+  s:function(opts,cb){
+    Properties.find(opts).populate('pictures').populate('idUser').exec((err,data)=> {
+      if(err)return cb(err);
+      cb(err,data);
+    });
+  },
+
+  c:function(opts,cb){
+    Properties.create(opts).exec((err,data)=>{
+      if(err)return cb(err);
+      cb(err,data);
+    });
+  },
+
+  createId:function(cb){
+    let query = Properties.find();
+    //let sort = 'no DESC';
+    query.sort('no DESC');
+    query.exec((err,data)=> {
+      if(err)return cb(err);
+      var id = 'p'+(data[0].no+1);
+      cb(err,id);
+    });
+  },
+
+  searchListing:function(params,cb){
+    var status, type, location;
+    if(params.status === '') delete params.status;
+    if(params.type === '') delete params.type;
+    if(params.location === ''){
+      location = '';
+    }else if(params.location!=='' && params.location){
+      location = params.location;
+    }else{
+      location = '';
+    }
+    delete params.location;
+    //TEST PARAMETER
+     //cb(params);
+    
+    var query,queryLocation;
+    queryLocation = {
+      address:{'contains':location}
+    };
+    query = Object.assign(params,queryLocation);
+    Properties.find(query).populate('pictures').populate('idUser').exec(function(err,data){
+      if(err)return cb(err);
+      cb(err,data);
+    });
+
   }
+
+
 };
 
